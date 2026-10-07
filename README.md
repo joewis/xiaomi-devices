@@ -166,13 +166,59 @@ reach the cloud login nor block on a prompt.
 
 ## Credits
 
-The login path vendors [Xiaomi-cloud-tokens-extractor](https://github.com/PiotrMachowski/Xiaomi-cloud-tokens-extractor)
-by Piotr Machowski (MIT) — it is the only login implementation found that handles an account
-with two-factor authentication. The map format and the device's service and fault definitions
-follow the [Valetudo](https://github.com/Hypfer/Valetudo) and
-[Xiaomi Cloud Map Extractor](https://github.com/PiotrMachowski/Home-Assistant-custom-components-Xiaomi-Cloud-Map-Extractor)
-projects.
+This package stands on other people's work, and specific debts are worth naming because each
+solved a problem that was not solvable by reading a specification.
+
+**Code included in this repository:**
+
+- **[Xiaomi-cloud-tokens-extractor](https://github.com/PiotrMachowski/Xiaomi-cloud-tokens-extractor)**
+  — Piotr Machowski (MIT). The login implementation is vendored at
+  `xiaomi_devices/vendor/token_extractor.py`, with its licence alongside it. This is not a
+  courtesy credit: nothing else found handles an account with **two-factor authentication**,
+  and without it there is no route from an account to a device token at all.
+
+**Behaviour derived from other projects** — no code copied, but the values and formats were
+read out of these:
+
+- **[Valetudo](https://github.com/Hypfer/Valetudo)** — Hypfer (Apache-2.0). The fault-code
+  table in `faults.py` follows Valetudo's Dreame implementation, which is the reference for
+  this device family. Fault 32 ("Robot stuck or trapped"), the distinction between it and the
+  wheel codes, and the device's service identifiers all come from there.
+- **[Xiaomi Cloud Map Extractor](https://github.com/PiotrMachowski/Home-Assistant-custom-components-Xiaomi-Cloud-Map-Extractor)**
+  — Piotr Machowski (MIT). The map archive layout in `mapfile.py`: the 27-byte header, the
+  pixel encoding, and the nested `rism` layer that carries the room labels. None of that is
+  documented upstream; it was worked out there.
+- **[dreame-vacuum](https://github.com/Tasshack/dreame-vacuum)** — Tasshack (MIT). Additional
+  protocol reference for this device family — segment cleaning payloads, mode values, and the
+  status mappings.
+
+**Runtime dependencies:**
+
+- **[python-miio](https://github.com/rytilahti/python-miio)** — Teemu R and contributors
+  (GPL-3.0). The actual miIO transport. Everything in `device.py` is a thin layer over it; the
+  wake-by-broadcast and batched-property-read behaviours are its workarounds, documented here
+  so the next reader does not rediscover them.
+- **[MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk)** (MIT) — the server
+  framework, used only by `xiaomi_devices/mcp/`.
+
+If you are one of these authors and something here misrepresents your work, that is a bug —
+please report it.
 
 ## Licence
 
-MIT. The vendored extractor keeps its own upstream MIT licence, included alongside it.
+MIT. The vendored extractor keeps its own upstream MIT licence, included alongside it at
+`xiaomi_devices/vendor/LICENSE.token_extractor`.
+
+## Gentoo
+
+Packaged in the local overlay as `app-misc/xiaomi-devices`:
+
+```bash
+sudo emerge -v app-misc/xiaomi-devices
+```
+
+The ebuild installs into an isolated venv under `/opt/xiaomi-devices` and puts wrappers in
+`/usr/bin`, because two runtime dependencies (`python-miio`, `mcp`) are not in ::gentoo and
+their transitive trees are too deep to package individually. See the rebuild note in the
+sysadmin vault before bumping: the wheel bundle is assembled outside Portage, so the ebuild
+alone cannot reproduce it.
