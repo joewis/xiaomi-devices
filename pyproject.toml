@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xiaomi-devices"
+version = "0.1.0"
+description = "Local control and cloud map retrieval for Xiaomi-ecosystem robot vacuums"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+dependencies = [
+    "python-miio>=0.5.12",
+    "requests>=2.28",
+]
+
+[project.optional-dependencies]
+# Only the cloud half needs these: authentication and image rendering. The local control
+# path deliberately does not import them, so a headless service needs none of it.
+cloud = [
+    "colorama>=0.4",
+    "Pillow>=9",
+]
+
+[project.scripts]
+xiaomi-ctl = "cli.xiaomi_ctl:main"
+xiaomi-map = "cli.xiaomi_map:main"
+
+[tool.setuptools]
+packages = ["xiaomi_devices", "xiaomi_devices.vendor"]

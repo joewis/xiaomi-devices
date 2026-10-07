@@ -1,0 +1,21 @@
+# Nothing personal is committed here.
+#
+# Room mappings are generated from a map of a specific home and can name the people who live
+# in it. They live in the user's own config directory, never in the repo.
+rooms.json
+*.raw
+cloud_session.json
+secrets.env
+device.json
+
+# Generated artefacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Map images produced from a real home
+*.png
