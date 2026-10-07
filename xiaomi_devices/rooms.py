@@ -22,6 +22,9 @@ File format::
       }
     }
 
+The names above are invented placeholders, not anyone's home. A real mapping is generated
+from the device's own map by ``xiaomi-map rooms`` and stays on the machine that made it.
+
 Anything that reads a room name goes through here, so the lookup is one implementation with
 the cases as arguments rather than a branch per caller. Unknown names fail closed: the caller
 gets an error listing what is known, and nothing is sent to the device.

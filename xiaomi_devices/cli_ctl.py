@@ -8,6 +8,8 @@ Never prompts, never reads stdin. Safe to run from a service, a script, or a cro
     xiaomi-ctl control start
     xiaomi-ctl control clean_rooms "<room name>"
     xiaomi-ctl locate
+
+Room names come from your own mapping (see ``rooms``), so none are built in.
 """
 
 import argparse

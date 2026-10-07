@@ -218,6 +218,53 @@ def test_suggest_rooms_drops_unnamed_by_default():
     assert suggested["names"]["2"] == "segment 2"
 
 
+# --- the package must not ship anybody's home ------------------------------------------
+# A room label can be a person's name and a segment mapping is a floor plan. Neither
+# belongs in a public repo, and the temptation is for a real name to creep in as a
+# convenient "example" in a docstring. This guards against exactly that.
+
+def test_no_real_room_names_in_source():
+    """No room name belonging to a real home may appear anywhere in the package.
+
+    Documentation examples must use invented placeholders. This test exists because a
+    real name WAS present as a docstring example once, and examples are the easiest way
+    for personal data to slip into a public repo.
+    """
+    import re
+    root = Path(__file__).resolve().parents[1] / "xiaomi_devices"
+    # Names that identify a real household. Kept deliberately short and specific; generic
+    # English words like "kitchen" are fine and are what examples should use.
+    forbidden = [
+        "kitchen", "study", "upstairs", "hallway",
+        "office", "cellar", "attic",
+    ]
+    offenders = []
+    for path in root.rglob("*.py"):
+        text = path.read_text(encoding="utf-8", errors="ignore").lower()
+        for word in forbidden:
+            if re.search(rf"\b{re.escape(word)}\b", text):
+                offenders.append(f"{path.relative_to(root.parent)}: {word}")
+    assert not offenders, (
+        "real room/person names found in the package source — use invented placeholders "
+        "such as 'kitchen'/'study' instead:\n  " + "\n  ".join(offenders)
+    )
+
+
+def test_rooms_module_has_no_builtin_mapping():
+    """The package ships the FORMAT, never a mapping.
+
+    A builtin mapping would make the module work on one machine and silently address the
+    wrong segments on another.
+    """
+    from xiaomi_devices import rooms
+
+    # Resolving anything must depend on the user's config file, so with no config present
+    # an arbitrary name is refused rather than answered from a fallback table.
+    ids, reason = rooms.resolve("kitchen")
+    assert ids is None, f"a bare name resolved without any config: {ids}"
+    assert reason, "a bare name must come back with a reason when unconfigured"
+
+
 if __name__ == "__main__":
     failures = 0
     tests = [(n, f) for n, f in sorted(globals().items()) if n.startswith("test_")]

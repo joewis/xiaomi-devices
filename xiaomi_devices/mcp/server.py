@@ -188,8 +188,9 @@ async def vacuum_control(action: str, value: str = "") -> str:
     description=(
         "Send the robot vacuum to clean one or more NAMED ROOMS and nothing else. Use this "
         "rather than a whole-floor start when a specific room is asked for, e.g. 'clean the "
-        "living room', 'do the master bedroom'. It is more precise and uses less battery. An "
-        "unrecognised room name is refused before anything is sent."
+        "kitchen'. It is more precise and uses less battery. An unrecognised room name is "
+        "refused before anything is sent. Call vacuum_rooms first to see the names that are "
+        "configured on this machine."
     ),
 )
 async def vacuum_clean_rooms(rooms_arg: str) -> str:

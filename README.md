@@ -70,7 +70,7 @@ login path in this package.
 xiaomi-ctl status                  # state, battery, faults, consumables
 xiaomi-ctl control start
 xiaomi-ctl control dock
-xiaomi-ctl control clean_rooms "<room name>"
+xiaomi-ctl control clean_rooms "<room name>"   # names come from your own mapping
 
 xiaomi-map devices                 # list the account's devices
 xiaomi-map fetch --qr              # scan with the phone app; no captcha, no emailed code
@@ -91,6 +91,12 @@ xiaomi-map rooms ~/.local/share/xiaomi-devices/map-<did>-0.raw --write
 Then edit `~/.config/xiaomi-devices/rooms.json` to rename rooms to whatever you call them and
 delete any you do not want addressable. An unrecognised name is refused before anything is
 sent to the device.
+
+**No room name is built into this package, and none ever will be.** A room label can be a
+is a person, and a mapping is a floor plan; neither belongs in a repo. The only names in the
+source are invented placeholders (`kitchen`, `study`) in documentation. Every real name comes
+from the mapping on the machine that generated it — so `xiaomi-ctl rooms` is the way to find
+out what this install can address.
 
 ## How the map works, and what it is not
 
