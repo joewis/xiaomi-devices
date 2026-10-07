@@ -93,7 +93,7 @@ delete any you do not want addressable. An unrecognised name is refused before a
 sent to the device.
 
 **No room name is built into this package, and none ever will be.** A room label can be a
-is a person, and a mapping is a floor plan; neither belongs in a repo. The only names in the
+person's name and a mapping is a floor plan; neither belongs in a repo. The only names in the
 source are invented placeholders (`kitchen`, `study`) in documentation. Every real name comes
 from the mapping on the machine that generated it — so `xiaomi-ctl rooms` is the way to find
 out what this install can address.

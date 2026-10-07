@@ -226,27 +226,47 @@ def test_suggest_rooms_drops_unnamed_by_default():
 def test_no_real_room_names_in_source():
     """No room name belonging to a real home may appear anywhere in the package.
 
-    Documentation examples must use invented placeholders. This test exists because a
-    real name WAS present as a docstring example once, and examples are the easiest way
-    for personal data to slip into a public repo.
+    Documentation examples must use invented placeholders such as 'kitchen'/'study'.
+
+    The forbidden names are stored as SHA-256 prefixes rather than as literals, because a
+    guard that lists the real names in plain text IS ITSELF the disclosure. Anyone who
+    genuinely needs to check a candidate name can hash it and compare:
+
+        python3 -c "import hashlib; print(hashlib.sha256('myroom'.encode()).hexdigest()[:16])"
+
+    Scope note: this checks the PACKAGE source only. The guard's own file is necessarily
+    excluded, since hash prefixes of room names are themselves derived from those names.
     """
+    import hashlib
     import re
+
     root = Path(__file__).resolve().parents[1] / "xiaomi_devices"
-    # Names that identify a real household. Kept deliberately short and specific; generic
-    # English words like "kitchen" are fine and are what examples should use.
-    forbidden = [
-        "kitchen", "study", "upstairs", "hallway",
-        "office", "cellar", "attic",
-    ]
-    offenders = []
+    forbidden_hashes = {
+        "d277670919a94ba3",  # identifying
+        "87a6525c6d101f28",  # identifying
+        "f5662649c772d7d7",  # identifying
+        "69ff8042237aeef5",  # identifying
+        "4a45b30831d6a209",  # identifying
+        "b649b80cea10fb01",  # identifying
+        "4c1666c3ad86a2d7",  # generic, but real
+        "1e5be85f5a03d533",  # generic, but real
+    }
+    # Word-boundary matching, so a forbidden name cannot be matched as a substring of an
+    # unrelated identifier (or of a longer ordinary word).
+    words = set()
     for path in root.rglob("*.py"):
         text = path.read_text(encoding="utf-8", errors="ignore").lower()
-        for word in forbidden:
-            if re.search(rf"\b{re.escape(word)}\b", text):
-                offenders.append(f"{path.relative_to(root.parent)}: {word}")
+        words.update(re.findall(r"[a-z]+", text))
+
+    offenders = []
+    for word in sorted(words):
+        if hashlib.sha256(word.encode()).hexdigest()[:16] in forbidden_hashes:
+            offenders.append(word)
+
     assert not offenders, (
-        "real room/person names found in the package source — use invented placeholders "
-        "such as 'kitchen'/'study' instead:\n  " + "\n  ".join(offenders)
+        "room names from a real home appear in the package source (matched by hash; the "
+        "names are intentionally not printed here). Use invented placeholders such as "
+        "'kitchen'/'study' instead."
     )
 
 
