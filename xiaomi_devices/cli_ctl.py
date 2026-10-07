@@ -14,7 +14,8 @@ import argparse
 import json
 import sys
 
-from xiaomi_devices import config, device as dev, faults, rooms
+from . import config, faults, rooms
+from . import device as dev
 
 
 def _emit(payload) -> int:

@@ -3,6 +3,8 @@
 Everything here runs offline. The map tests use a synthetic archive built the same way the
 device builds one, so the decoder is exercised end to end without shipping anybody's floor
 plan in the repo.
+
+Run either as a plain script (``python tests/test_core.py``) or under pytest.
 """
 
 import base64

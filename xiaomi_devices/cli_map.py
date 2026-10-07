@@ -17,7 +17,22 @@ import json
 import pathlib
 import sys
 
-from xiaomi_devices import cloud, config, mapfile
+# The cloud half needs optional dependencies (colorama for the interactive login, Pillow for
+# image rendering). Import them lazily so a missing extra produces an instruction rather than
+# a traceback — this command is only usable with them, but the message should say so.
+try:
+    from . import cloud, config, mapfile
+
+    _IMPORT_ERROR = None
+except ImportError as _exc:  # pragma: no cover - depends on install extras
+    cloud = config = mapfile = None
+    _IMPORT_ERROR = _exc
+
+_CLOUD_EXTRA_HINT = (
+    "this command needs the cloud extras, which are not installed.\n"
+    "  install them with:  pip install 'xiaomi-devices[cloud]'\n"
+    "  (the non-interactive 'xiaomi-ctl' command needs neither)"
+)
 
 
 def _out_dir(args) -> pathlib.Path:
@@ -149,6 +164,11 @@ def cmd_rooms(args) -> int:
 
 
 def main(argv=None) -> int:
+    if _IMPORT_ERROR is not None:
+        print(_CLOUD_EXTRA_HINT, file=sys.stderr)
+        print(f"  (missing module: {_IMPORT_ERROR.name})", file=sys.stderr)
+        return 2
+
     parser = argparse.ArgumentParser(prog="xiaomi-map", description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
 

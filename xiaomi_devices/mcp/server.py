@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
-"""MCP server exposing a Xiaomi/Dreame vacuum as a shared agent tool.
+"""MCP server exposing a Xiaomi/Dreame vacuum to agents.
 
-A THIN WRAPPER over the xiaomi_devices library. The library holds the behaviour — device
-protocol, fault table, map decoding, room resolution — and this file only adapts it to MCP.
-It lives in the gateway's backend directory because that is where the gateway expects backend
-programs; the substance is not here.
+A THIN WRAPPER over the rest of this package: it holds no device logic itself. The protocol,
+fault table, map decoding and room resolution all live in the sibling modules, so behaviour
+cannot drift between the command line and the agent-facing tools.
 
-Non-interactive by construction: it imports only the local half of the library, so it cannot
-reach the cloud login and cannot block on a human. Cloud work (map fetch) is a separate,
-interactive command line.
+It imports only the LOCAL half, so it cannot reach the cloud login and cannot block on a
+human. Cloud work (map fetching) is the separate interactive command.
+
+Run with ``xiaomi-vacuum-mcp``.
 """
 
 import json
-import sys
 
 from mcp.server.mcpserver import MCPServer
 
-from xiaomi_devices import config, device as dev, faults, rooms
+from .. import config, faults, rooms
+from .. import device as dev
 
 server = MCPServer("xiaomi-vacuum", "1.0.0")
 
@@ -218,5 +218,10 @@ async def vacuum_clean_rooms(rooms_arg: str) -> str:
     return _j(result)
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Console entry point: serve over stdio."""
     server.run()
+
+
+if __name__ == "__main__":
+    main()

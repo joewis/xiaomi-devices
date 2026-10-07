@@ -1,32 +1,43 @@
 # xiaomi-devices
 
-Tools for Xiaomi-ecosystem robot vacuums: local control over the LAN, and map retrieval from
-the Xiaomi cloud.
+Tools for Xiaomi-ecosystem robot vacuums: local control over the LAN, map retrieval from the
+Xiaomi cloud, and an MCP server so agents can use both.
 
 Built for a Dreame/Xiaomi 1C (`dreame.vacuum.mc1808`), but the local controls and the map
 decoder target the wider Dreame family.
 
-## Two halves, deliberately separate
+## Three commands, one package
 
-The package is split along a lifecycle boundary, not a stylistic one:
+Everything ships together, but the command surface is split along a lifecycle boundary rather
+than a stylistic one:
 
-| | **Local** (`xiaomi-ctl`) | **Cloud** (`xiaomi-map`) |
-|---|---|---|
-| Talks to | the device, over miIO | Xiaomi's account service |
-| Asks a human? | never | captcha, emailed code, or QR scan |
-| Runs | continuously, from a service | rarely, by hand |
+| | **`xiaomi-ctl`** | **`xiaomi-map`** | **`xiaomi-vacuum-mcp`** |
+|---|---|---|---|
+| Talks to | the device, over miIO | Xiaomi's account | the device, over miIO |
+| Asks a human? | never | captcha, code, or QR scan | never |
+| Runs | continuously | rarely, by hand | as a service |
 
 An always-on service must never be able to block on a human input prompt, so the
-non-interactive half imports none of the interactive code. That is why this is a library with
+non-interactive paths import none of the interactive code. That is why this is a library with
 two commands rather than one program.
 
 ## Install
 
 ```bash
-pip install .
-# or, for map fetching and image rendering too:
-pip install '.[cloud]'
+pip install '.[all]'     # everything: cloud login, image rendering, MCP server
 ```
+
+Extras exist so a deployment can leave out what it does not need — the local control path
+needs none of them:
+
+```bash
+pip install .                    # xiaomi-ctl only
+pip install '.[cloud]'           # + xiaomi-map
+pip install '.[mcp]'             # + xiaomi-vacuum-mcp
+```
+
+Invoking a command whose extra is absent prints how to install it, rather than an import
+traceback.
 
 ## Configure
 
@@ -133,10 +144,25 @@ xiaomi_devices/
   mapfile.py    fetch and decode map archives, room extraction, rendering
   faults.py     the fault table
   rooms.py      spoken name -> segment id, from a local mapping
+  cli_ctl.py    xiaomi-ctl  (local, non-interactive)
+  cli_map.py    xiaomi-map  (cloud, interactive)
+  mcp/          xiaomi-vacuum-mcp — thin MCP wrapper over the local half
   vendor/       the token extractor (MIT, see LICENSE.token_extractor)
-cli/            xiaomi-ctl (non-interactive) and xiaomi-map (interactive)
-mcp/            an MCP server wrapping the local half
+tests/
 ```
+
+Every command is a front end over the same modules, so the command line and the agent-facing
+tools cannot disagree about device behaviour.
+
+## MCP server
+
+```bash
+xiaomi-vacuum-mcp          # speaks MCP over stdio
+```
+
+It exposes `vacuum_status`, `vacuum_where`, `vacuum_capabilities`, `vacuum_rooms`,
+`vacuum_control` and `vacuum_clean_rooms`. It imports only the local half, so it can neither
+reach the cloud login nor block on a prompt.
 
 ## Credits
 

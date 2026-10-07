@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xiaomi-devices"
-version = "0.1.0"
-description = "Local control and cloud map retrieval for Xiaomi-ecosystem robot vacuums"
+version = "0.2.0"
+description = "Local control, cloud map retrieval and MCP tools for Xiaomi robot vacuums"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -16,16 +16,30 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Only the cloud half needs these: authentication and image rendering. The local control
-# path deliberately does not import them, so a headless service needs none of it.
+# Everything runs from one package; these groups only exist so a deployment can leave out
+# what it does not need. The LOCAL control path imports neither group, which is what lets a
+# headless service ship without the interactive login machinery.
 cloud = [
     "colorama>=0.4",
     "Pillow>=9",
 ]
+mcp = [
+    "mcp>=2.0",
+]
+all = [
+    "colorama>=0.4",
+    "Pillow>=9",
+    "mcp>=2.0",
+]
 
 [project.scripts]
-xiaomi-ctl = "cli.xiaomi_ctl:main"
-xiaomi-map = "cli.xiaomi_map:main"
+xiaomi-ctl = "xiaomi_devices.cli_ctl:main"
+xiaomi-map = "xiaomi_devices.cli_map:main"
+xiaomi-vacuum-mcp = "xiaomi_devices.mcp:main"
 
 [tool.setuptools]
-packages = ["xiaomi_devices", "xiaomi_devices.vendor"]
+packages = [
+    "xiaomi_devices",
+    "xiaomi_devices.mcp",
+    "xiaomi_devices.vendor",
+]
