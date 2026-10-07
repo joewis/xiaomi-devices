@@ -222,3 +222,6 @@ The ebuild installs into an isolated venv under `/opt/xiaomi-devices` and puts w
 their transitive trees are too deep to package individually. See the rebuild note in the
 sysadmin vault before bumping: the wheel bundle is assembled outside Portage, so the ebuild
 alone cannot reproduce it.
+
+The packaged install is what the MCP gateway serves, so a backend change is a version bump
+rather than an edit to a script on disk.
